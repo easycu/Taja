@@ -2,209 +2,295 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>속기 마스터 - 연습 & 게임</title>
+    <title>속기 마스터 Pro - 맞춤형 연습</title>
     <style>
-        /* 깔끔한 디자인을 위한 스타일 */
-        body { font-family: 'Apple SD Gothic Neo', sans-serif; background-color: #f0f2f5; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px; }
-        nav { margin-bottom: 20px; }
-        nav button { padding: 10px 20px; margin: 0 5px; cursor: pointer; border: none; border-radius: 5px; background-color: #007bff; color: white; font-weight: bold; }
-        .container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 80%; max-width: 800px; text-align: center; }
+        body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background-color: #f4f7f9; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px; color: #333; }
+        nav { margin-bottom: 25px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+        nav button { padding: 12px 20px; cursor: pointer; border: none; border-radius: 8px; background-color: #4a90e2; color: white; font-weight: bold; transition: 0.3s; }
+        nav button:hover { background-color: #357abd; }
+        .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 90%; max-width: 900px; text-align: center; min-height: 400px; }
         .hidden { display: none; }
-        input[type="text"] { width: 80%; padding: 10px; font-size: 18px; margin-top: 10px; border: 2px solid #ddd; border-radius: 5px; }
-        .stat { margin-top: 15px; font-size: 14px; color: #666; }
+        input[type="text"], textarea { width: 90%; padding: 15px; font-size: 18px; margin-top: 15px; border: 2px solid #e1e4e8; border-radius: 10px; outline: none; }
+        input[type="text"]:focus { border-color: #4a90e2; }
+        .stat { margin-top: 20px; font-size: 16px; font-weight: bold; color: #555; }
         
-        /* 약어 관리 리스트 */
-        ul { list-style: none; padding: 0; max-height: 200px; overflow-y: auto; border: 1px solid #eee; margin-top: 10px; }
-        li { padding: 8px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        li button { background: #ff4d4d; color: white; border: none; padding: 3px 8px; border-radius: 3px; cursor: pointer; }
+        /* 목록 관리 */
+        .list-section { display: flex; gap: 20px; margin-top: 20px; text-align: left; }
+        .list-box { flex: 1; border: 1px solid #eee; border-radius: 10px; padding: 10px; height: 300px; overflow-y: auto; }
+        ul { list-style: none; padding: 0; }
+        li { padding: 10px; border-bottom: 1px solid #f9f9f9; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+        li:hover { background-color: #fcfcfc; }
+        li button { background: #ff5e5e; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
 
-        /* 산성비 게임 화면 */
-        #game-canvas { width: 100%; height: 400px; background-color: #222; position: relative; overflow: hidden; border-radius: 10px; margin-bottom: 10px; }
-        .falling-word { position: absolute; color: white; font-weight: bold; white-space: nowrap; }
+        /* 텍스트 선택창 */
+        .select-box { padding: 10px; width: 100%; font-size: 16px; border-radius: 8px; margin-bottom: 20px; }
+
+        /* 연습 화면 전용 스타일 */
+        #target-display { font-size: 22px; line-height: 1.6; background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: left; min-height: 100px; border-left: 5px solid #4a90e2; }
+        .highlight-correct { color: #4a90e2; font-weight: bold; }
+        .highlight-wrong { color: #e74c3c; font-weight: bold; }
+
+        /* 게임 화면 */
+        #game-canvas { width: 100%; height: 400px; background-color: #1a1a1a; position: relative; overflow: hidden; border-radius: 15px; margin-bottom: 15px; }
+        .falling-word { position: absolute; color: #00d1ff; font-weight: bold; font-size: 18px; white-space: nowrap; text-shadow: 0 0 5px rgba(0,209,255,0.5); }
     </style>
 </head>
 <body>
 
-    <h1>⌨️ 속기 연습 프로그램</h1>
+    <h1>⌨️ 속기 연습 마스터</h1>
 
     <nav>
         <button onclick="showMode('abbreviation')">약어 연습</button>
+        <button onclick="showMode('shorttext')">짧은 글 연습</button>
         <button onclick="showMode('longtext')">긴 글 연습</button>
         <button onclick="showMode('game')">산성비 게임</button>
-        <button onclick="showMode('manage')">약어/단어 관리</button>
+        <button onclick="showMode('manage')">데이터 관리</button>
     </nav>
 
     <div id="abbreviation-mode" class="container">
         <h2>약어 집중 연습</h2>
-        <p>제시된 단어를 입력하세요. (띄어쓰기 무시)</p>
-        <div id="target-word" style="font-size: 32px; font-weight: bold; color: #007bff; margin-bottom: 20px;">준비 중...</div>
+        <div id="abbr-target" style="font-size: 40px; font-weight: bold; color: #4a90e2; margin-bottom: 30px;">단어를 등록해 주세요.</div>
         <input type="text" id="abbr-input" placeholder="입력 후 엔터" onkeypress="handleAbbrInput(event)">
-        <div class="stat">정확도: <span id="abbr-acc">0</span>%</div>
+        <div class="stat">방금 정확도: <span id="abbr-acc">-</span>%</div>
+    </div>
+
+    <div id="shorttext-mode" class="container hidden">
+        <h2>짧은 글 랜덤 연습</h2>
+        <p>등록된 긴 글에서 문장 하나를 무작위로 가져옵니다.</p>
+        <div id="short-target" id="target-display" style="font-size: 22px; padding: 20px; background: #f8f9fa; border-radius: 10px; margin-bottom: 20px; min-height: 60px;">텍스트를 먼저 등록하세요.</div>
+        <input type="text" id="short-input" placeholder="문장을 따라 치고 엔터를 누르세요" onkeypress="handleShortInput(event)">
+        <div class="stat">정확도(띄어쓰기 제외): <span id="short-acc">0</span>%</div>
+        <button onclick="setNextShortText()" style="margin-top:20px; background:#6c757d; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">다음 문장</button>
     </div>
 
     <div id="longtext-mode" class="container hidden">
-        <h2>실전 텍스트 연습</h2>
-        <input type="file" id="file-upload" accept=".txt" onchange="loadTextFile(event)">
-        <div id="text-display" style="margin-top:20px; text-align: left; background: #f9f9f9; padding: 15px; min-height: 100px; white-space: pre-wrap;">파일을 업로드하면 여기에 표시됩니다.</div>
-        <input type="text" id="long-input" placeholder="위 내용을 따라 치세요" oninput="checkLongText()">
+        <h2>긴 글 실전 연습</h2>
+        <select id="long-text-select" class="select-box" onchange="loadSelectedLongText()">
+            <option value="">연습할 글을 선택하세요</option>
+        </select>
+        <div id="long-target" style="text-align: left; background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px; white-space: pre-wrap; max-height: 200px; overflow-y: auto;">글을 선택하면 여기에 표시됩니다.</div>
+        <textarea id="long-input" rows="5" placeholder="위 내용을 따라 입력하세요..." oninput="checkLongText()"></textarea>
+        <div class="stat">진행도: <span id="long-progress">0</span>% | 정확도: <span id="long-acc">0</span>%</div>
     </div>
 
     <div id="game-mode" class="container hidden">
-        <h2>산성비 게임</h2>
+        <h2>산성비 약어 게임</h2>
         <div id="game-canvas"></div>
-        <input type="text" id="game-input" placeholder="단어를 치고 엔터!" onkeypress="handleGameInput(event)">
+        <input type="text" id="game-input" placeholder="단어를 입력하세요" onkeypress="handleGameInput(event)">
         <div class="stat">점수: <span id="game-score">0</span> | 목숨: <span id="game-life">5</span></div>
-        <button onclick="startGame()" style="margin-top:10px;">게임 시작</button>
+        <button onclick="startGame()" style="margin-top:10px; padding:10px 30px; background:#28a745; color:white; border:none; border-radius:5px; cursor:pointer;">게임 시작</button>
     </div>
 
     <div id="manage-mode" class="container hidden">
-        <h2>약어 목록 관리</h2>
-        <div style="margin-bottom: 15px;">
-            <input type="text" id="new-word" placeholder="새 단어/약어 입력" style="width: 60%;">
-            <button onclick="addWord()" style="padding: 10px;">추가</button>
+        <h2>데이터 관리 센터</h2>
+        <div class="list-section">
+            <div class="list-box">
+                <h3>약어/단어 목록</h3>
+                <input type="text" id="new-word" placeholder="단어 입력" style="width:70%; font-size: 14px;">
+                <button onclick="addWord()">추가</button>
+                <ul id="word-list"></ul>
+            </div>
+            <div class="list-box">
+                <h3>긴 글 저장 목록</h3>
+                <input type="file" id="file-upload" accept=".txt" style="font-size: 12px; margin-bottom: 10px;" onchange="handleFileUpload(event)">
+                <ul id="long-text-list"></ul>
+            </div>
         </div>
-        <ul id="word-list"></ul>
     </div>
 
     <script>
-        // 기본 데이터 및 초기화
-        let words = JSON.parse(localStorage.getItem('stenoWords')) || ["대한민국", "경제성장", "민주주의", "국회의원", "사회복지"];
-        let currentAbbrIndex = 0;
-        let score = 0;
-        let life = 5;
-        let gameInterval;
-        let fallingWords = [];
+        // 저장된 데이터 불러오기
+        let words = JSON.parse(localStorage.getItem('stenoWords')) || ["대한민국", "경제성장", "민주주의"];
+        let longTexts = JSON.parse(localStorage.getItem('stenoLongTexts')) || [];
+        
+        let currentMode = 'abbreviation';
+        let currentAbbr = "";
+        let currentShortSentence = "";
+        let gameActive = false;
 
         function showMode(mode) {
+            currentMode = mode;
             document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
             document.getElementById(mode + '-mode').classList.remove('hidden');
-            if(mode === 'manage') renderWordList();
+            gameActive = false;
+            
+            if(mode === 'manage') renderAllLists();
             if(mode === 'abbreviation') setNextAbbr();
+            if(mode === 'shorttext') setNextShortText();
+            if(mode === 'longtext') updateLongTextSelect();
         }
 
-        // --- 약어 관리 기능 ---
-        function renderWordList() {
-            const list = document.getElementById('word-list');
-            list.innerHTML = '';
-            words.forEach((w, index) => {
-                const li = document.createElement('li');
-                li.innerHTML = `${w} <button onclick="deleteWord(${index})">삭제</button>`;
-                list.appendChild(li);
+        // --- 데이터 관리 기능 ---
+        function renderAllLists() {
+            // 약어 목록
+            const wList = document.getElementById('word-list');
+            wList.innerHTML = '';
+            words.forEach((w, i) => {
+                wList.innerHTML += `<li>${w} <button onclick="deleteWord(${i})">삭제</button></li>`;
             });
             localStorage.setItem('stenoWords', JSON.stringify(words));
+
+            // 긴 글 목록
+            const lList = document.getElementById('long-text-list');
+            lList.innerHTML = '';
+            longTexts.forEach((t, i) => {
+                lList.innerHTML += `<li>${t.title} <button onclick="deleteLongText(${i})">삭제</button></li>`;
+            });
+            localStorage.setItem('stenoLongTexts', JSON.stringify(longTexts));
         }
 
         function addWord() {
-            const input = document.getElementById('new-word');
-            if(input.value.trim()) {
-                words.push(input.value.trim());
-                input.value = '';
-                renderWordList();
-            }
+            const val = document.getElementById('new-word').value.trim();
+            if(val) { words.push(val); document.getElementById('new-word').value = ''; renderAllLists(); }
         }
+        function deleteWord(i) { words.splice(i, 1); renderAllLists(); }
 
-        function deleteWord(index) {
-            words.splice(index, 1);
-            renderWordList();
-        }
-
-        // --- 약어 연습 로직 ---
-        function setNextAbbr() {
-            if(words.length === 0) {
-                document.getElementById('target-word').innerText = "관리 탭에서 단어를 추가하세요!";
-                return;
-            }
-            currentAbbrIndex = Math.floor(Math.random() * words.length);
-            document.getElementById('target-word').innerText = words[currentAbbrIndex];
-        }
-
-        function handleAbbrInput(e) {
-            if(e.key === 'Enter') {
-                const input = document.getElementById('abbr-input');
-                const target = words[currentAbbrIndex].replace(/\s/g, ''); // 띄어쓰기 제거
-                const userVal = input.value.replace(/\s/g, '');
-
-                if(userVal === target) {
-                    document.getElementById('abbr-acc').innerText = "100";
-                    input.style.borderColor = "#28a745";
-                } else {
-                    document.getElementById('abbr-acc').innerText = "0";
-                    input.style.borderColor = "#dc3545";
-                }
-                setTimeout(() => {
-                    input.value = '';
-                    input.style.borderColor = '#ddd';
-                    setNextAbbr();
-                }, 500);
-            }
-        }
-
-        // --- 파일 로드 및 연습 로직 ---
-        function loadTextFile(e) {
+        function handleFileUpload(e) {
             const file = e.target.files[0];
+            if(!file) return;
             const reader = new FileReader();
-            reader.onload = function(event) {
-                document.getElementById('text-display').innerText = event.target.result;
+            reader.onload = function(ev) {
+                longTexts.push({ title: file.name, content: ev.target.result });
+                renderAllLists();
             };
             reader.readAsText(file);
         }
+        function deleteLongText(i) { longTexts.splice(i, 1); renderAllLists(); }
 
-        // --- 산성비 게임 로직 ---
-        function startGame() {
-            if(words.length === 0) return alert("연습할 단어가 없습니다!");
-            score = 0; life = 5; fallingWords = [];
-            document.getElementById('game-score').innerText = score;
-            document.getElementById('game-life').innerText = life;
-            document.getElementById('game-canvas').innerHTML = '';
-            clearInterval(gameInterval);
-            gameInterval = setInterval(createFallingWord, 2000);
-            requestAnimationFrame(updateGame);
+        // --- 연습 로직 공통: 띄어쓰기 제거 비교 ---
+        function clean(text) { return text.replace(/\s/g, ''); }
+
+        // 1. 약어 연습
+        function setNextAbbr() {
+            if(words.length === 0) return;
+            currentAbbr = words[Math.floor(Math.random() * words.length)];
+            document.getElementById('abbr-target').innerText = currentAbbr;
         }
-
-        function createFallingWord() {
-            const wordText = words[Math.floor(Math.random() * words.length)];
-            const wordEl = document.createElement('div');
-            wordEl.className = 'falling-word';
-            wordEl.innerText = wordText;
-            wordEl.style.left = Math.random() * 80 + '%';
-            wordEl.style.top = '0px';
-            document.getElementById('game-canvas').appendChild(wordEl);
-            fallingWords.push({ el: wordEl, top: 0, text: wordText.replace(/\s/g, '') });
-        }
-
-        function updateGame() {
-            if(life <= 0) {
-                alert("게임 종료! 최종 점수: " + score);
-                clearInterval(gameInterval);
-                return;
+        function handleAbbrInput(e) {
+            if(e.key === 'Enter') {
+                const input = document.getElementById('abbr-input');
+                const acc = clean(input.value) === clean(currentAbbr) ? 100 : 0;
+                document.getElementById('abbr-acc').innerText = acc;
+                input.value = '';
+                setNextAbbr();
             }
-            fallingWords.forEach((w, i) => {
-                w.top += 1.5; // 떨어지는 속도
+        }
+
+        // 2. 짧은 글 연습 (마침표 기준 분리)
+        function setNextShortText() {
+            if(longTexts.length === 0) return;
+            const randomText = longTexts[Math.floor(Math.random() * longTexts.length)].content;
+            const sentences = randomText.split(/[.!?]\s|\n/).filter(s => s.trim().length > 5);
+            if(sentences.length > 0) {
+                currentShortSentence = sentences[Math.floor(Math.random() * sentences.length)].trim();
+                document.getElementById('short-target').innerText = currentShortSentence;
+            }
+        }
+        function handleShortInput(e) {
+            if(e.key === 'Enter') {
+                const input = document.getElementById('short-input');
+                const userVal = clean(input.value);
+                const targetVal = clean(currentShortSentence);
+                
+                // 간단한 정확도 계산 (글자 일치수 기반)
+                let matchCount = 0;
+                for(let i=0; i<Math.min(userVal.length, targetVal.length); i++) {
+                    if(userVal[i] === targetVal[i]) matchCount++;
+                }
+                const acc = targetVal.length > 0 ? Math.round((matchCount / targetVal.length) * 100) : 0;
+                document.getElementById('short-acc').innerText = acc;
+                
+                input.value = '';
+                setNextShortText();
+            }
+        }
+
+        // 3. 긴 글 연습
+        function updateLongTextSelect() {
+            const select = document.getElementById('long-text-select');
+            select.innerHTML = '<option value="">연습할 글을 선택하세요</option>';
+            longTexts.forEach((t, i) => {
+                select.innerHTML += `<option value="${i}">${t.title}</option>`;
+            });
+        }
+        function loadSelectedLongText() {
+            const idx = document.getElementById('long-text-select').value;
+            if(idx !== "") {
+                document.getElementById('long-target').innerText = longTexts[idx].content;
+                document.getElementById('long-input').value = '';
+            }
+        }
+        function checkLongText() {
+            const target = document.getElementById('long-target').innerText;
+            const user = document.getElementById('long-input').value;
+            const cleanTarget = clean(target);
+            const cleanUser = clean(user);
+            
+            const progress = Math.min(100, Math.round((cleanUser.length / cleanTarget.length) * 100));
+            document.getElementById('long-progress').innerText = progress;
+            
+            let matches = 0;
+            for(let i=0; i<cleanUser.length; i++) {
+                if(cleanUser[i] === cleanTarget[i]) matches++;
+            }
+            const acc = cleanUser.length > 0 ? Math.round((matches / cleanUser.length) * 100) : 0;
+            document.getElementById('long-acc').innerText = acc;
+        }
+
+        // --- 4. 산성비 게임 ---
+        let score = 0, life = 5, falling = [], gameInt;
+        function startGame() {
+            score = 0; life = 5; falling = []; gameActive = true;
+            document.getElementById('game-canvas').innerHTML = '';
+            document.getElementById('game-score').innerText = 0;
+            document.getElementById('game-life').innerText = 5;
+            clearInterval(gameInt);
+            gameInt = setInterval(createWord, 2000);
+            updateGame();
+        }
+        function createWord() {
+            if(!gameActive) return;
+            const txt = words[Math.floor(Math.random() * words.length)];
+            const el = document.createElement('div');
+            el.className = 'falling-word';
+            el.innerText = txt;
+            el.style.left = (Math.random() * 80 + 5) + '%';
+            el.style.top = '0px';
+            document.getElementById('game-canvas').appendChild(el);
+            falling.push({ el: el, top: 0, txt: clean(txt) });
+        }
+        function updateGame() {
+            if(!gameActive) return;
+            falling.forEach((w, i) => {
+                w.top += 1.5;
                 w.el.style.top = w.top + 'px';
-                if(w.top > 380) {
+                if(w.top > 370) {
                     w.el.remove();
-                    fallingWords.splice(i, 1);
+                    falling.splice(i, 1);
                     life--;
                     document.getElementById('game-life').innerText = life;
+                    if(life <= 0) { gameActive = false; alert("게임 종료! 점수: " + score); }
                 }
             });
-            requestAnimationFrame(updateGame);
+            if(gameActive) requestAnimationFrame(updateGame);
         }
-
         function handleGameInput(e) {
             if(e.key === 'Enter') {
                 const input = document.getElementById('game-input');
-                const val = input.value.replace(/\s/g, '');
-                const targetIdx = fallingWords.findIndex(w => w.text === val);
-                if(targetIdx > -1) {
-                    fallingWords[targetIdx].el.remove();
-                    fallingWords.splice(targetIdx, 1);
+                const val = clean(input.value);
+                const idx = falling.findIndex(w => w.txt === val);
+                if(idx > -1) {
+                    falling[idx].el.remove();
+                    falling.splice(idx, 1);
                     score += 10;
                     document.getElementById('game-score').innerText = score;
                 }
                 input.value = '';
             }
         }
+
+        // 초기 화면 설정
+        showMode('abbreviation');
     </script>
 </body>
 </html>
