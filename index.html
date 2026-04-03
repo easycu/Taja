@@ -11,24 +11,22 @@
         .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 90%; max-width: 900px; text-align: center; min-height: 400px; }
         .hidden { display: none; }
         input[type="text"], textarea { width: 90%; padding: 15px; font-size: 18px; margin-top: 15px; border: 2px solid #e1e4e8; border-radius: 10px; outline: none; }
-        input[type="text"]:focus { border-color: #4a90e2; }
+        input[type="text"]:focus, textarea:focus { border-color: #4a90e2; }
         .stat { margin-top: 20px; font-size: 16px; font-weight: bold; color: #555; }
         
         /* 목록 관리 */
         .list-section { display: flex; gap: 20px; margin-top: 20px; text-align: left; }
-        .list-box { flex: 1; border: 1px solid #eee; border-radius: 10px; padding: 10px; height: 300px; overflow-y: auto; }
-        ul { list-style: none; padding: 0; }
-        li { padding: 10px; border-bottom: 1px solid #f9f9f9; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+        .list-box { flex: 1; border: 1px solid #eee; border-radius: 10px; padding: 15px; height: 300px; overflow-y: auto; background: #fff; }
+        ul { list-style: none; padding: 0; margin: 0; }
+        li { padding: 10px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
         li:hover { background-color: #fcfcfc; }
         li button { background: #ff5e5e; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
 
         /* 텍스트 선택창 */
-        .select-box { padding: 10px; width: 100%; font-size: 16px; border-radius: 8px; margin-bottom: 20px; }
+        .select-box { padding: 10px; width: 100%; font-size: 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ccc; }
 
         /* 연습 화면 전용 스타일 */
-        #target-display { font-size: 22px; line-height: 1.6; background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: left; min-height: 100px; border-left: 5px solid #4a90e2; }
-        .highlight-correct { color: #4a90e2; font-weight: bold; }
-        .highlight-wrong { color: #e74c3c; font-weight: bold; }
+        .target-box { font-size: 22px; line-height: 1.6; background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: left; min-height: 80px; border-left: 5px solid #4a90e2; word-break: keep-all; }
 
         /* 게임 화면 */
         #game-canvas { width: 100%; height: 400px; background-color: #1a1a1a; position: relative; overflow: hidden; border-radius: 15px; margin-bottom: 15px; }
@@ -37,7 +35,7 @@
 </head>
 <body>
 
-    <h1>⌨️ 속기 연습 마스터</h1>
+    <h1>⌨️ 속기 연습 마스터 Pro</h1>
 
     <nav>
         <button onclick="showMode('abbreviation')">약어 연습</button>
@@ -56,11 +54,11 @@
 
     <div id="shorttext-mode" class="container hidden">
         <h2>짧은 글 랜덤 연습</h2>
-        <p>등록된 긴 글에서 문장 하나를 무작위로 가져옵니다.</p>
-        <div id="short-target" id="target-display" style="font-size: 22px; padding: 20px; background: #f8f9fa; border-radius: 10px; margin-bottom: 20px; min-height: 60px;">텍스트를 먼저 등록하세요.</div>
+        <p>저장된 긴 글에서 마침표(.) 단위로 분리된 문장이 무작위로 출제됩니다.</p>
+        <div id="short-target" class="target-box">텍스트 파일을 먼저 등록하세요.</div>
         <input type="text" id="short-input" placeholder="문장을 따라 치고 엔터를 누르세요" onkeypress="handleShortInput(event)">
         <div class="stat">정확도(띄어쓰기 제외): <span id="short-acc">0</span>%</div>
-        <button onclick="setNextShortText()" style="margin-top:20px; background:#6c757d; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">다음 문장</button>
+        <button onclick="setNextShortText()" style="margin-top:20px; background:#6c757d; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:bold;">다음 문장 넘어가기</button>
     </div>
 
     <div id="longtext-mode" class="container hidden">
@@ -68,7 +66,7 @@
         <select id="long-text-select" class="select-box" onchange="loadSelectedLongText()">
             <option value="">연습할 글을 선택하세요</option>
         </select>
-        <div id="long-target" style="text-align: left; background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px; white-space: pre-wrap; max-height: 200px; overflow-y: auto;">글을 선택하면 여기에 표시됩니다.</div>
+        <div id="long-target" class="target-box" style="white-space: pre-wrap; max-height: 250px; overflow-y: auto;">글을 선택하면 여기에 표시됩니다.</div>
         <textarea id="long-input" rows="5" placeholder="위 내용을 따라 입력하세요..." oninput="checkLongText()"></textarea>
         <div class="stat">진행도: <span id="long-progress">0</span>% | 정확도: <span id="long-acc">0</span>%</div>
     </div>
@@ -78,28 +76,29 @@
         <div id="game-canvas"></div>
         <input type="text" id="game-input" placeholder="단어를 입력하세요" onkeypress="handleGameInput(event)">
         <div class="stat">점수: <span id="game-score">0</span> | 목숨: <span id="game-life">5</span></div>
-        <button onclick="startGame()" style="margin-top:10px; padding:10px 30px; background:#28a745; color:white; border:none; border-radius:5px; cursor:pointer;">게임 시작</button>
+        <button onclick="startGame()" style="margin-top:10px; padding:10px 30px; background:#28a745; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">게임 시작</button>
     </div>
 
     <div id="manage-mode" class="container hidden">
         <h2>데이터 관리 센터</h2>
         <div class="list-section">
             <div class="list-box">
-                <h3>약어/단어 목록</h3>
-                <input type="text" id="new-word" placeholder="단어 입력" style="width:70%; font-size: 14px;">
-                <button onclick="addWord()">추가</button>
+                <h3 style="margin-top:0;">약어/단어 목록</h3>
+                <div style="display:flex; margin-bottom:10px;">
+                    <input type="text" id="new-word" placeholder="새 단어 입력" style="margin-top:0; width:70%; font-size: 14px; border-radius:5px 0 0 5px;">
+                    <button onclick="addWord()" style="width:30%; border:none; background:#4a90e2; color:white; border-radius:0 5px 5px 0; cursor:pointer;">추가</button>
+                </div>
                 <ul id="word-list"></ul>
             </div>
             <div class="list-box">
-                <h3>긴 글 저장 목록</h3>
-                <input type="file" id="file-upload" accept=".txt" style="font-size: 12px; margin-bottom: 10px;" onchange="handleFileUpload(event)">
+                <h3 style="margin-top:0;">긴 글 저장 목록 (.txt)</h3>
+                <input type="file" id="file-upload" accept=".txt" style="font-size: 14px; margin-bottom: 10px; width:100%;" onchange="handleFileUpload(event)">
                 <ul id="long-text-list"></ul>
             </div>
         </div>
     </div>
 
     <script>
-        // 저장된 데이터 불러오기
         let words = JSON.parse(localStorage.getItem('stenoWords')) || ["대한민국", "경제성장", "민주주의"];
         let longTexts = JSON.parse(localStorage.getItem('stenoLongTexts')) || [];
         
@@ -115,14 +114,24 @@
             gameActive = false;
             
             if(mode === 'manage') renderAllLists();
-            if(mode === 'abbreviation') setNextAbbr();
-            if(mode === 'shorttext') setNextShortText();
+            if(mode === 'abbreviation') { setNextAbbr(); setTimeout(()=>document.getElementById('abbr-input').focus(), 100); }
+            if(mode === 'shorttext') { setNextShortText(); setTimeout(()=>document.getElementById('short-input').focus(), 100); }
             if(mode === 'longtext') updateLongTextSelect();
         }
 
-        // --- 데이터 관리 기능 ---
+        // 텍스트 정제 (속기 규칙 적용)
+        function convertStenoText(text) {
+            let res = text;
+            // 1. 단일 알파벳 대문자 한글 변환
+            const alpha = { 'A':'에이', 'B':'비', 'C':'씨', 'D':'디', 'E':'이', 'F':'에프', 'G':'지', 'H':'에이치', 'I':'아이', 'J':'제이', 'K':'케이', 'L':'엘', 'M':'엠', 'N':'엔', 'O':'오', 'P':'피', 'Q':'큐', 'R':'알', 'S':'에스', 'T':'티', 'U':'유', 'V':'브이', 'W':'더블유', 'X':'엑스', 'Y':'와이', 'Z':'제트' };
+            res = res.replace(/\b[A-Z]\b/g, m => alpha[m] || m);
+            
+            // 2. 계산 기호 한글 변환
+            res = res.replace(/\+/g, ' 더하기 ').replace(/-/g, ' 빼기 ').replace(/\*/g, ' 곱하기 ').replace(/\//g, ' 나누기 ').replace(/=/g, ' 는 ');
+            return res;
+        }
+
         function renderAllLists() {
-            // 약어 목록
             const wList = document.getElementById('word-list');
             wList.innerHTML = '';
             words.forEach((w, i) => {
@@ -130,11 +139,10 @@
             });
             localStorage.setItem('stenoWords', JSON.stringify(words));
 
-            // 긴 글 목록
             const lList = document.getElementById('long-text-list');
             lList.innerHTML = '';
             longTexts.forEach((t, i) => {
-                lList.innerHTML += `<li>${t.title} <button onclick="deleteLongText(${i})">삭제</button></li>`;
+                lList.innerHTML += `<li><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:70%;">${t.title}</span> <button onclick="deleteLongText(${i})">삭제</button></li>`;
             });
             localStorage.setItem('stenoLongTexts', JSON.stringify(longTexts));
         }
@@ -150,14 +158,33 @@
             if(!file) return;
             const reader = new FileReader();
             reader.onload = function(ev) {
-                longTexts.push({ title: file.name, content: ev.target.result });
+                // 속기 규칙이 적용된 텍스트
+                const convertedText = convertStenoText(ev.target.result);
+                
+                // 마침표(.)를 기준으로 분리하되 마침표 보존
+                let rawChunks = convertedText.split('.');
+                let sentenceArray = [];
+                for(let i = 0; i < rawChunks.length - 1; i++) {
+                    let s = rawChunks[i].trim();
+                    if(s.length > 0) sentenceArray.push(s + '.');
+                }
+                let lastPart = rawChunks[rawChunks.length - 1].trim();
+                if(lastPart.length > 0) sentenceArray.push(lastPart);
+
+                longTexts.push({ 
+                    title: file.name, 
+                    content: convertedText, 
+                    sentences: sentenceArray // 짧은 글용 문장 배열 완벽 저장
+                });
                 renderAllLists();
+                alert(`"${file.name}" 파일이 성공적으로 분리 및 저장되었습니다!`);
+                e.target.value = ''; // 초기화
             };
             reader.readAsText(file);
         }
         function deleteLongText(i) { longTexts.splice(i, 1); renderAllLists(); }
 
-        // --- 연습 로직 공통: 띄어쓰기 제거 비교 ---
+        // 공통: 띄어쓰기 제거
         function clean(text) { return text.replace(/\s/g, ''); }
 
         // 1. 약어 연습
@@ -176,23 +203,31 @@
             }
         }
 
-        // 2. 짧은 글 연습 (마침표 기준 분리)
+        // 2. 짧은 글 연습
         function setNextShortText() {
-            if(longTexts.length === 0) return;
-            const randomText = longTexts[Math.floor(Math.random() * longTexts.length)].content;
-            const sentences = randomText.split(/[.!?]\s|\n/).filter(s => s.trim().length > 5);
-            if(sentences.length > 0) {
-                currentShortSentence = sentences[Math.floor(Math.random() * sentences.length)].trim();
-                document.getElementById('short-target').innerText = currentShortSentence;
+            let allSentences = [];
+            longTexts.forEach(t => {
+                if(t.sentences) allSentences = allSentences.concat(t.sentences);
+            });
+            
+            if(allSentences.length === 0) {
+                document.getElementById('short-target').innerText = "데이터 관리 탭에서 텍스트 파일을 먼저 등록해주세요.";
+                return;
             }
+            
+            currentShortSentence = allSentences[Math.floor(Math.random() * allSentences.length)];
+            document.getElementById('short-target').innerText = currentShortSentence;
+            document.getElementById('short-input').value = '';
+            document.getElementById('short-acc').innerText = '0';
+            document.getElementById('short-input').focus();
         }
+        
         function handleShortInput(e) {
             if(e.key === 'Enter') {
                 const input = document.getElementById('short-input');
                 const userVal = clean(input.value);
                 const targetVal = clean(currentShortSentence);
                 
-                // 간단한 정확도 계산 (글자 일치수 기반)
                 let matchCount = 0;
                 for(let i=0; i<Math.min(userVal.length, targetVal.length); i++) {
                     if(userVal[i] === targetVal[i]) matchCount++;
@@ -200,8 +235,7 @@
                 const acc = targetVal.length > 0 ? Math.round((matchCount / targetVal.length) * 100) : 0;
                 document.getElementById('short-acc').innerText = acc;
                 
-                input.value = '';
-                setNextShortText();
+                setTimeout(() => setNextShortText(), 300);
             }
         }
 
@@ -212,12 +246,15 @@
             longTexts.forEach((t, i) => {
                 select.innerHTML += `<option value="${i}">${t.title}</option>`;
             });
+            document.getElementById('long-target').innerText = '글을 선택하면 여기에 표시됩니다.';
+            document.getElementById('long-input').value = '';
         }
         function loadSelectedLongText() {
             const idx = document.getElementById('long-text-select').value;
             if(idx !== "") {
                 document.getElementById('long-target').innerText = longTexts[idx].content;
                 document.getElementById('long-input').value = '';
+                document.getElementById('long-input').focus();
             }
         }
         function checkLongText() {
@@ -227,7 +264,7 @@
             const cleanUser = clean(user);
             
             const progress = Math.min(100, Math.round((cleanUser.length / cleanTarget.length) * 100));
-            document.getElementById('long-progress').innerText = progress;
+            document.getElementById('long-progress').innerText = progress || 0;
             
             let matches = 0;
             for(let i=0; i<cleanUser.length; i++) {
@@ -237,13 +274,15 @@
             document.getElementById('long-acc').innerText = acc;
         }
 
-        // --- 4. 산성비 게임 ---
+        // 4. 산성비 게임
         let score = 0, life = 5, falling = [], gameInt;
         function startGame() {
+            if(words.length === 0) return alert("데이터 관리 탭에서 단어를 먼저 추가하세요!");
             score = 0; life = 5; falling = []; gameActive = true;
             document.getElementById('game-canvas').innerHTML = '';
             document.getElementById('game-score').innerText = 0;
             document.getElementById('game-life').innerText = 5;
+            document.getElementById('game-input').focus();
             clearInterval(gameInt);
             gameInt = setInterval(createWord, 2000);
             updateGame();
@@ -269,7 +308,7 @@
                     falling.splice(i, 1);
                     life--;
                     document.getElementById('game-life').innerText = life;
-                    if(life <= 0) { gameActive = false; alert("게임 종료! 점수: " + score); }
+                    if(life <= 0) { gameActive = false; alert("게임 종료! 최종 점수: " + score); }
                 }
             });
             if(gameActive) requestAnimationFrame(updateGame);
@@ -289,7 +328,6 @@
             }
         }
 
-        // 초기 화면 설정
         showMode('abbreviation');
     </script>
 </body>
